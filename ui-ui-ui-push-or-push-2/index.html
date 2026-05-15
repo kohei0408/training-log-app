@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Training Log</title>
+    <meta name="theme-color" content="#187a72" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Training Log" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Training Log</p>
+          <h1>今日の積み上げ</h1>
+        </div>
+        <div class="streak-pill">
+          <span id="streakCount">0</span>
+          <small>日継続</small>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" id="homeView" aria-labelledby="homeTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="homeTitle">ホーム</h2>
+              <p id="selectedDateLabel">今日の記録</p>
+            </div>
+            <button class="primary-action" id="startWorkoutButton" type="button">トレーニングを始める</button>
+          </div>
+
+          <section class="calendar-panel" aria-label="トレーニングカレンダー">
+            <div class="calendar-header">
+              <button class="icon-button" id="prevMonthButton" type="button" aria-label="前の月">‹</button>
+              <strong id="calendarMonth"></strong>
+              <button class="icon-button" id="nextMonthButton" type="button" aria-label="次の月">›</button>
+            </div>
+            <div class="weekday-grid">
+              <span>日</span>
+              <span>月</span>
+              <span>火</span>
+              <span>水</span>
+              <span>木</span>
+              <span>金</span>
+              <span>土</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+          </section>
+
+          <section class="daily-log" aria-label="選択日の記録">
+            <div class="section-heading compact">
+              <div>
+                <h2 id="dailyTitle">記録内容</h2>
+                <p id="dailySummary">日付を選ぶと詳細を表示します</p>
+              </div>
+              <button class="secondary-action small-action" id="editDailyButton" type="button">編集</button>
+            </div>
+            <div id="dailyLogList" class="log-list empty-state"></div>
+          </section>
+        </section>
+
+        <section class="view" id="analysisView" aria-labelledby="analysisTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="analysisTitle">分析</h2>
+              <p>過去のトレーニング記録</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <article>
+              <span id="totalSessions">0</span>
+              <small>総セッション</small>
+            </article>
+            <article>
+              <span id="totalSets">0</span>
+              <small>総セット</small>
+            </article>
+            <article>
+              <span id="totalVolume">0kg</span>
+              <small>総ボリューム</small>
+            </article>
+          </div>
+          <section class="chart-panel">
+            <div class="chart-header">
+              <h3>直近7回のボリューム</h3>
+              <p>kg × 回数</p>
+            </div>
+            <div class="bar-chart" id="volumeChart"></div>
+          </section>
+          <section class="chart-panel">
+            <div class="chart-header">
+              <h3>部位別セット数</h3>
+              <p>記録済みメニューから集計</p>
+            </div>
+            <div class="muscle-chart" id="muscleChart"></div>
+          </section>
+        </section>
+      </main>
+
+      <nav class="bottom-tabs" aria-label="メインタブ">
+        <button class="tab-button active" data-view="homeView" type="button">ホーム</button>
+        <button class="tab-button" data-view="analysisView" type="button">分析</button>
+      </nav>
+    </div>
+
+    <dialog id="workoutDialog" class="workout-dialog">
+      <form method="dialog" class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Workout</p>
+            <h2 id="dialogTitle">トレーニングを開始</h2>
+          </div>
+          <button class="icon-button" id="closeDialogButton" type="button" aria-label="閉じる">×</button>
+        </div>
+
+        <div class="step active" id="startStep">
+          <button class="choice-button" id="chooseWorkoutButton" type="button">
+            <strong>トレーニング選択</strong>
+            <span>部位と種目を選んで今日の内容を作成</span>
+          </button>
+          <button class="choice-button" id="copyWorkoutButton" type="button">
+            <strong>トレーニングコピー</strong>
+            <span>過去の記録を今日に複製</span>
+          </button>
+          <div id="copyList" class="copy-list"></div>
+        </div>
+
+        <div class="step" id="muscleStep">
+          <div class="muscle-grid" id="muscleGrid"></div>
+          <button class="secondary-action" id="backToStartButton" type="button">戻る</button>
+        </div>
+
+        <div class="step" id="exerciseStep">
+          <div class="selection-header">
+            <button class="secondary-action" id="backToMuscleButton" type="button">部位に戻る</button>
+            <strong id="exerciseMuscleTitle">種目選択</strong>
+          </div>
+          <label class="search-field">
+            種目を検索
+            <input id="exerciseSearchInput" type="search" placeholder="ベンチプレス、スクワット..." />
+          </label>
+          <section class="bookmark-section" aria-label="ブックマーク種目">
+            <div class="mini-heading">
+              <strong>ブックマーク</strong>
+              <small id="bookmarkCount">0件</small>
+            </div>
+            <div class="exercise-list" id="bookmarkExerciseList"></div>
+          </section>
+          <section aria-label="種目一覧">
+            <div class="mini-heading">
+              <strong id="exerciseListTitle">種目一覧</strong>
+              <small>★で保存</small>
+            </div>
+            <div class="exercise-list" id="exerciseList"></div>
+          </section>
+        </div>
+
+        <div class="step" id="entryStep">
+          <div class="session-header">
+            <div>
+              <strong id="sessionTitle">今日のトレーニング</strong>
+              <small id="sessionSummary">種目ごとにセットを記録</small>
+            </div>
+            <button class="secondary-action" id="addAnotherButton" type="button">種目を追加</button>
+          </div>
+          <div id="currentWorkoutList" class="workout-builder empty-state"></div>
+          <div class="dialog-actions">
+            <button class="primary-action" id="finishWorkoutButton" type="button">トレーニング完了</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
